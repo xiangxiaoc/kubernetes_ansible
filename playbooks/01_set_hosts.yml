@@ -1,0 +1,28 @@
+---
+- name: Set self's hostname and Add hostname mappings into /etc/hosts
+  hosts: all # All nodes of entire k8s-cluster including load balancers and etcd-cluster 
+  remote_user: root
+  gather_facts: no
+  tasks:
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+        use: systemd
+        
+    - name: Add hostname mappings
+      blockinfile:
+        path: /etc/hosts
+        block: |
+          {{ item.ip }} {{ item.hostname }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.hostname }}"
+      loop:
+        - { hostname: etcd-1, ip: 10.197.32.211 }
+        - { hostname: etcd-2, ip: 10.197.32.212 }
+        - { hostname: etcd-3, ip: 10.197.32.213 }
+        - { hostname: k8s-lb-vip, ip: 10.197.32.141 }           
+        - { hostname: k8s-lb-1, ip: 10.197.32.139 }
+        - { hostname: k8s-lb-2, ip: 10.197.32.163 }      
+        - { hostname: k8s-master-1, ip: 10.197.32.149 }
+        - { hostname: k8s-master-2, ip: 10.197.32.150 }
+        - { hostname: k8s-master-3, ip: 10.197.32.151 }
+        - { hostname: k8s-worker-1, ip: 10.197.32.214 }

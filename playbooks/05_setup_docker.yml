@@ -1,0 +1,56 @@
+---
+- name: Install docker
+  hosts: k8s_masters
+  remote_user: root
+  gather_facts: no
+  vars:
+    local_docker_config_path: ../docker/daemon.json
+
+  tasks:
+    - name: Add docker offical repo
+      yum_repository:
+        name: docker-ce-stable
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+        enabled: yes
+        gpgcheck: yes
+        gpgcakey: https://download.docker.com/linux/centos/gpg
+        exclude:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        file: docker-ce
+        state: present
+
+    - name: Add rpm key
+      rpm_key:
+        key: https://download.docker.com/linux/centos/gpg
+        state: present
+
+    - name: Install docker
+      yum:
+        name:
+          - docker-ce-19.03.11
+          - docker-ce-cli-19.03.11
+          - containerd.io-1.2.13
+        disable_excludes: docker-ce-stable
+        state: present
+
+    - name: Create /etc/docker if it does not exist
+      file:
+        path: /etc/docker
+        state: directory
+        mode: "0755"
+
+    - name: Configure docker daemon
+      copy:
+        src: "{{ local_docker_config_path }}"
+        dest: /etc/docker/daemon.json
+        mode: "0644"
+
+    - name: Start and enabled auto-start docker daemon
+      systemd:
+        name: docker.service
+        daemon_reload: yes
+        enabled: yes
+        state: started

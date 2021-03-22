@@ -1,0 +1,58 @@
+---
+- name: Install etcd and bootstrap etcd cluster
+  hosts: etcd_cluster
+  remote_user: root
+  gather_facts: no
+  vars:
+    local_etcdadm_path: ../etcd/etcdadm-linux-amd64
+    etcd_node1_inventory_hostname: etcd-1
+    etcdadm_path: /usr/local/bin/etcdadm
+    local_data_path: ../data
+  tasks:
+    - name: Distribute etcdadm tool
+      copy:
+        src: "{{ local_etcdadm_path }}"
+        dest: "{{ etcdadm_path }}"
+        mode: "0700"
+
+    - name: Initialize first etcd on etcd_node1
+      command:
+        cmd: "{{ etcdadm_path }} init"
+        creates: /var/lib/etcd/member
+      when: inventory_hostname == etcd_node1_inventory_hostname        
+
+    - name: Fetch CA crt and CA key from etcd_node1
+      fetch:
+        src: "{{ item.file_path }}"
+        dest: "{{ item.fetch_path }}"
+        flat: yes
+      when: inventory_hostname == etcd_node1_inventory_hostname        
+      loop:
+        - { file_path: /etc/etcd/pki/ca.crt, fetch_path: "{{ local_data_path }}/{{ inventory_hostname }}_ca/ca.crt" }
+        - { file_path: /etc/etcd/pki/ca.key, fetch_path: "{{ local_data_path }}/{{ inventory_hostname }}_ca/ca.key" }
+        # for kubeadm init, need apiserver-etcd-client crt and key
+        - { file_path: /etc/etcd/pki/apiserver-etcd-client.crt, fetch_path: "{{ local_data_path }}/{{ inventory_hostname }}_ca/apiserver-etcd-client.crt" }
+        - { file_path: /etc/etcd/pki/apiserver-etcd-client.key, fetch_path: "{{ local_data_path }}/{{ inventory_hostname }}_ca/apiserver-etcd-client.key" }        
+
+    - name: Create /etc/etcd/pki if it does not exist
+      file:
+        path: /etc/etcd/pki
+        state: directory
+        mode: "0755"
+      when: inventory_hostname != etcd_node1_inventory_hostname        
+
+    - name: Distribute CA crt and CA key
+      copy:
+        src: "{{ local_data_path }}/{{etcd_node1_inventory_hostname}}_ca/{{ item.src_file_name }}"
+        dest: "{{ item.dest_file_path }}"
+        mode: "0644"
+      when: inventory_hostname != etcd_node1_inventory_hostname        
+      loop:
+        - { src_file_name: ca.crt, dest_file_path: /etc/etcd/pki/ca.crt }
+        - { src_file_name: ca.key, dest_file_path: /etc/etcd/pki/ca.key }
+
+    - name: Make other etcd nodes join the etcd_node1
+      command:
+        cmd: "{{etcdadm_path}} join https://{{etcd_node1_inventory_hostname}}:2379"
+        creates: /var/lib/etcd/member
+      when: inventory_hostname != etcd_node1_inventory_hostname

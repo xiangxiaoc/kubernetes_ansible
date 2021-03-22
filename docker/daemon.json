@@ -1,0 +1,15 @@
+{
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-file": "1",
+        "max-size": "10m"
+    },
+    "exec-opts": ["native.cgroupdriver=systemd"],
+    "storage-driver": "overlay2",
+    "storage-opts": [
+      "overlay2.override_kernel_check=true"
+    ],    
+    "registry-mirrors": [
+        "https://registry.docker-cn.com"
+    ]
+}

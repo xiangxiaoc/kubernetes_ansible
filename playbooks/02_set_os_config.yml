@@ -1,0 +1,29 @@
+---
+- name: Prepare basical setup to initialize nodes # all kubernetes master nodes and work nodes
+  hosts: all
+  remote_user: root
+  gather_facts: no
+  tasks:
+    - name: Disable swap partition in /etc/fstab
+      replace:
+        path: /etc/fstab
+        regexp: '^\s*/dev/mapper/centos-swap'
+        replace: "# /dev/mapper/centos-swap"
+
+    - name: Disable swap partition immediately
+      command: "swapoff -a"
+
+    - name: Disable firewalld.service immediately and when system startup
+      systemd:
+        name: firewalld.service
+        enabled: no
+        state: stopped
+
+    - name: Disable SELINUX when system startup
+      lineinfile:
+        path: /etc/selinux/config
+        regexp: "^SELINUX="
+        line: SELINUX=disabled
+
+    - name: Disable SELINUX immediately
+      command: "setenforce 0"

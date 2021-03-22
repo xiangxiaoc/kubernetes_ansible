@@ -1,0 +1,63 @@
+---
+- name: Setup Keepalived and HAproxy for k8s load balancers
+  hosts: k8s_lbs
+  remote_user: root
+  gather_facts: no
+  vars:
+    lb_node1_inventory_hostname: k8s-lb-1
+    local_lb_conf_path: ../load_balancer
+  tasks:
+
+    - name: Install Keepalived and HAProxy
+      yum:
+        name:
+          - keepalived-1.3.5
+          - haproxy
+        state: present
+
+    - name: Upload config file to master load balancer 
+      copy:
+        src: "{{ local_lb_conf_path }}/{{ item.src }}"
+        dest: "/etc/{{ item.dest }}"
+        backup: yes
+      loop:
+        - { src: keepalived_master.conf, dest: keepalived/keepalived.conf }
+        - { src: haproxy.cfg, dest: haproxy/haproxy.cfg }
+        - { src: check_apiserver.sh, dest: keepalived/check_apiserver.sh }
+      when: inventory_hostname == lb_node1_inventory_hostname           
+
+    - name: Upload config file to backup load balancer 
+      copy:
+        src: "{{ local_lb_conf_path }}/{{ item.src }}"
+        dest: "/etc/{{ item.dest }}"
+        backup: yes
+      loop:
+        - { src: keepalived_backup.conf, dest: keepalived/keepalived.conf }
+        - { src: haproxy.cfg, dest: haproxy/haproxy.cfg }
+        - { src: check_apiserver.sh, dest: keepalived/check_apiserver.sh }
+      when: inventory_hostname != lb_node1_inventory_hostname           
+
+    - name: get k8s-lb-vip in /etc/hosts on remote machines
+      shell: grep k8s-lb-vip /etc/hosts | grep -v '^#' | awk '{print $1}'
+      register: k8s_lb_vip
+
+    - name: replace placeholder in keepalived.conf
+      replace:
+        path: /etc/keepalived/keepalived.conf
+        regexp: 'k8s-lb-vip'
+        replace: "{{ k8s_lb_vip.stdout }}"
+
+    - name: chmod +x /etc/keepalived/check_apiserver.sh
+      file:
+        path: /etc/keepalived/check_apiserver.sh
+        mode: "0755"
+        
+    - name: Start and enabled Keepalived and HAProxy
+      systemd:
+        name: "{{ item.service_name }}"
+        daemon_reload: yes
+        enabled: yes
+        state: started
+      loop:
+        - { service_name: keepalived.service }
+        - { service_name: haproxy.service }

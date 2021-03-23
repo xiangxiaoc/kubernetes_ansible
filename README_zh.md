@@ -1,5 +1,5 @@
 # kubernetes_ansible
-Quickly deploy kubernetes high-availability cluster with ansible based on kubeadm tool
+基于 kubeadm 工具，用 Ansible 快速部署 Kubernetes 高可用集群
 
 [English](README.md)
 

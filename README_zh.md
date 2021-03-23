@@ -1,7 +1,7 @@
 # kubernetes_ansible
 Quickly deploy kubernetes high-availability cluster with ansible based on kubeadm tool
 
-[简体中文](README_zh.md)
+[English](README.md)
 
 ## Cluster architecture
 
@@ -21,10 +21,10 @@ k8s-master-2| Control node 2|4C 2G|docker, kubelet, kubeadm, ipvsadm
 k8s-master-3| Control node 3|4C 2G|docker, kubelet, kubeadm, ipvsadm
 k8s-worker-1| Work node 1|4C 8G| docker, kubelet, kubeadm, ipvsadm
 
-In production environment, more backup nodes for LB and more work nodes can be added as per above table.
+在生产环境中，根据上表可以增加更多的LB备份节点和工作节点。
 
 ## Deployment
 
-Make sure all the nodes can be sshed via root without password authentication.
+确保所有的节点都可以通过root被ssh连接，而不需要密码身份验证。
 
-Once the nodes have been provisioned. Manually modify the ip address in `00_set_local_hosts.yml` and `01_set-hosts.yml`. Ansible will help configure hosts files on local ansible host and target machines. If you have already added hostname and ip mapping into /etc/hosts on local ansible host, skip playbook `00_set_local_hosts.yml`
+一旦提供了节点。手动修改“00_set_local_hosts”文件中的ip地址。yml”和“01 _set-hosts.yml”。Ansible将帮助配置本地Ansible主机和目标机器上的主机文件。如果您已经将主机名和ip映射添加到本地ansible主机的/etc/hosts中，请跳过playbook ' 00_set_local_hosts.yml '

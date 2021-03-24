@@ -3,11 +3,13 @@
 
 [English](README.md)
 
-## Cluster architecture
+## 集群架构
 
 ![k8s-architecture](resources/k8s-architecture.jpg)
 
-### Preparation for nodes
+### 节点准备
+
+- 操作系统: centos 7.x
 
 Host Name|Role|Size|Software list
 ---|---|---|---
@@ -23,7 +25,7 @@ k8s-worker-1| Work node 1|4C 8G| docker, kubelet, kubeadm, ipvsadm
 
 在生产环境中，根据上表可以增加更多的LB备份节点和工作节点。
 
-## Deployment
+## 部署
 
 确保所有的节点都可以通过root被ssh连接，而不需要密码身份验证。
 

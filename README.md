@@ -9,6 +9,8 @@ Quickly deploy kubernetes high-availability cluster with ansible based on kubead
 
 ### Preparation for nodes
 
+- os: centos 7.x
+
 Host Name|Role|Size|Software list
 ---|---|---|---
 etcd-1|Etcd node 1|2C 1G|etcd

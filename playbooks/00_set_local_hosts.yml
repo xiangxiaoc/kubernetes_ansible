@@ -2,11 +2,11 @@
 - name: Set local /etc/hosts
   hosts: 127.0.0.1
   connection: local
-  become: yes
-  gather_facts: no
+  become: true
+  gather_facts: false
   tasks:
     - name: Add hostname mappings
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: /etc/hosts
         block: |
           {{ item.ip }} {{ item.hostname }}
@@ -15,9 +15,9 @@
         - { hostname: etcd-1, ip: 10.197.32.211 }
         - { hostname: etcd-2, ip: 10.197.32.212 }
         - { hostname: etcd-3, ip: 10.197.32.213 }
-        - { hostname: k8s-lb-vip, ip: 10.197.32.141 }           
+        - { hostname: k8s-lb-vip, ip: 10.197.32.141 }
         - { hostname: k8s-lb-1, ip: 10.197.32.139 }
-        - { hostname: k8s-lb-2, ip: 10.197.32.163 }      
+        - { hostname: k8s-lb-2, ip: 10.197.32.163 }
         - { hostname: k8s-master-1, ip: 10.197.32.149 }
         - { hostname: k8s-master-2, ip: 10.197.32.150 }
         - { hostname: k8s-master-3, ip: 10.197.32.151 }

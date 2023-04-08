@@ -2,18 +2,18 @@
 - name: Install docker
   hosts: k8s_masters
   remote_user: root
-  gather_facts: no
+  gather_facts: false
   vars:
     local_docker_config_path: ../docker/daemon.json
 
   tasks:
     - name: Add docker offical repo
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: docker-ce-stable
         description: Docker CE Stable - $basearch
         baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
-        enabled: yes
-        gpgcheck: yes
+        enabled: true
+        gpgcheck: true
         gpgcakey: https://download.docker.com/linux/centos/gpg
         exclude:
           - docker-ce
@@ -23,12 +23,12 @@
         state: present
 
     - name: Add rpm key
-      rpm_key:
+      ansible.builtin.rpm_key:
         key: https://download.docker.com/linux/centos/gpg
         state: present
 
     - name: Install docker
-      yum:
+      ansible.builtin.yum:
         name:
           - docker-ce-19.03.11
           - docker-ce-cli-19.03.11
@@ -37,20 +37,20 @@
         state: present
 
     - name: Create /etc/docker if it does not exist
-      file:
+      ansible.builtin.file:
         path: /etc/docker
         state: directory
         mode: "0755"
 
     - name: Configure docker daemon
-      copy:
+      ansible.builtin.copy:
         src: "{{ local_docker_config_path }}"
         dest: /etc/docker/daemon.json
         mode: "0644"
 
     - name: Start and enabled auto-start docker daemon
-      systemd:
+      ansible.builtin.systemd:
         name: docker.service
-        daemon_reload: yes
-        enabled: yes
+        daemon_reload: true
+        enabled: true
         state: started

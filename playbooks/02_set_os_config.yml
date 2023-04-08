@@ -2,28 +2,32 @@
 - name: Prepare basical setup to initialize nodes # all kubernetes master nodes and work nodes
   hosts: all
   remote_user: root
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: Disable swap partition in /etc/fstab
-      replace:
+      ansible.builtin.replace:
         path: /etc/fstab
         regexp: '^\s*/dev/mapper/centos-swap'
         replace: "# /dev/mapper/centos-swap"
 
     - name: Disable swap partition immediately
-      command: "swapoff -a"
+      ansible.builtin.command: "swapoff -a"
+      register: result
+      changed_when: result.rc != 0
 
     - name: Disable firewalld.service immediately and when system startup
-      systemd:
+      ansible.builtin.systemd:
         name: firewalld.service
-        enabled: no
+        enabled: false
         state: stopped
 
     - name: Disable SELINUX when system startup
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/selinux/config
         regexp: "^SELINUX="
         line: SELINUX=disabled
 
     - name: Disable SELINUX immediately
-      command: "setenforce 0"
+      ansible.builtin.command: "setenforce 0"
+      register: result
+      changed_when: result.rc != 0

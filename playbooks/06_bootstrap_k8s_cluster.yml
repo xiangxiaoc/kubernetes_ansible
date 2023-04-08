@@ -87,13 +87,13 @@
     - name: Upload CA cert of Etcd to k8s masters
       ansible.builtin.copy:
         src: "{{ local_data_path }}/{{ etcd_node1_inventory_hostname }}_ca/{{ item.src_filename }}"
-        dest: "{{ item.dest_file_path }}"
+        dest: "{{ item.dest_filepath }}"
         mode: "0644"
       loop:
-        - { src_filename: ca.crt, dest_file_path: /etc/kubernetes/pki/etcd/ca.crt }
-        - { src_filename: ca.key, dest_file_path: /etc/kubernetes/pki/etcd/ca.key }
-        - { src_filename: apiserver-etcd-client.crt, dest_file_path: /etc/kubernetes/pki/apiserver-etcd-client.crt }
-        - { src_filename: apiserver-etcd-client.key, dest_file_path: /etc/kubernetes/pki/apiserver-etcd-client.key }
+        - { src_filename: ca.crt, dest_filepath: /etc/kubernetes/pki/etcd/ca.crt }
+        - { src_filename: ca.key, dest_filepath: /etc/kubernetes/pki/etcd/ca.key }
+        - { src_filename: apiserver-etcd-client.crt, dest_filepath: /etc/kubernetes/pki/apiserver-etcd-client.crt }
+        - { src_filename: apiserver-etcd-client.key, dest_filepath: /etc/kubernetes/pki/apiserver-etcd-client.key }
 
     - name: Upload config file for kubeadm init to k8s master1
       ansible.builtin.copy:
@@ -158,33 +158,33 @@
     - name: Fetch certs from k8s master1
       ansible.builtin.fetch:
         src: "/etc/kubernetes/pki/{{ item.src_filepath }}"
-        dest: "{{ local_data_path }}/{{ inventory_hostname }}-pki/{{ item.dest_file_path }}"
+        dest: "{{ local_data_path }}/{{ inventory_hostname }}-pki/{{ item.dest_filepath }}"
         flat: true
       loop:
-        - { src_filepath: ca.crt, dest_file_path: ca.crt }
-        - { src_filepath: ca.key, dest_file_path: ca.key }
-        - { src_filepath: sa.key, dest_file_path: sa.key }
-        - { src_filepath: sa.pub, dest_file_path: sa.pub }
-        - { src_filepath: front-proxy-ca.crt, dest_file_path: front-proxy-ca.crt }
-        - { src_filepath: front-proxy-ca.key, dest_file_path: front-proxy-ca.key }
-        - { src_filepath: etcd/ca.crt, dest_file_path: etcd/ca.crt }
-        - { src_filepath: etcd/ca.key, dest_file_path: etcd/ca.key }
+        - { src_filepath: ca.crt, dest_filepath: ca.crt }
+        - { src_filepath: ca.key, dest_filepath: ca.key }
+        - { src_filepath: sa.key, dest_filepath: sa.key }
+        - { src_filepath: sa.pub, dest_filepath: sa.pub }
+        - { src_filepath: front-proxy-ca.crt, dest_filepath: front-proxy-ca.crt }
+        - { src_filepath: front-proxy-ca.key, dest_filepath: front-proxy-ca.key }
+        - { src_filepath: etcd/ca.crt, dest_filepath: etcd/ca.crt }
+        - { src_filepath: etcd/ca.key, dest_filepath: etcd/ca.key }
       when: inventory_hostname == k8s_master1_inventory_hostname
 
     - name: Upload certs to other k8s masters
       ansible.builtin.copy:
         src: "{{ local_data_path }}/{{ k8s_master1_inventory_hostname }}-pki/{{ item.src_filepath }}"
-        dest: "/etc/kubernetes/pki/{{ item.dest_file_path }}"
+        dest: "/etc/kubernetes/pki/{{ item.dest_filepath }}"
         mode: preserve
       loop:
-        - { src_filepath: ca.crt, dest_file_path: ca.crt }
-        - { src_filepath: ca.key, dest_file_path: ca.key }
-        - { src_filepath: sa.key, dest_file_path: sa.key }
-        - { src_filepath: sa.pub, dest_file_path: sa.pub }
-        - { src_filepath: front-proxy-ca.crt, dest_file_path: front-proxy-ca.crt }
-        - { src_filepath: front-proxy-ca.key, dest_file_path: front-proxy-ca.key }
-        - { src_filepath: etcd/ca.crt, dest_file_path: etcd/ca.crt }
-        - { src_filepath: etcd/ca.key, dest_file_path: etcd/ca.key }
+        - { src_filepath: ca.crt, dest_filepath: ca.crt }
+        - { src_filepath: ca.key, dest_filepath: ca.key }
+        - { src_filepath: sa.key, dest_filepath: sa.key }
+        - { src_filepath: sa.pub, dest_filepath: sa.pub }
+        - { src_filepath: front-proxy-ca.crt, dest_filepath: front-proxy-ca.crt }
+        - { src_filepath: front-proxy-ca.key, dest_filepath: front-proxy-ca.key }
+        - { src_filepath: etcd/ca.crt, dest_filepath: etcd/ca.crt }
+        - { src_filepath: etcd/ca.key, dest_filepath: etcd/ca.key }
       when: inventory_hostname != k8s_master1_inventory_hostname
 
     # - name: Generate kubeadm join as control panel script on k8s master1
